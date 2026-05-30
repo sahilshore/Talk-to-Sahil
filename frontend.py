@@ -253,7 +253,7 @@ if st.session_state.mode == "chat":
     if user_input:
         process_and_respond(user_input)
 else:
-    audio = st.audio_input("🎙️ Tap to record, tap again to stop or Refresh Mic                                 if any error ignore it")
+    audio = st.audio_input("🎙️ Tap to Record, tap again to Stop or Refresh Mic if any error ignore it (many brouser gives error)")
     if audio:
         try:
             audio_bytes = audio.getbuffer().tobytes()
