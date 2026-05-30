@@ -47,7 +47,12 @@ MAX_HISTORY_MESSAGES = 4
 # TOOLS
 # =====================================================
 
-tavily_tool = TavilySearch(max_results=3)
+def _make_tavily_tool():
+    if os.getenv("TAVILY_API_KEY"):
+        return TavilySearch(max_results=3)
+    return None
+
+tavily_tool = _make_tavily_tool()
 
 # =====================================================
 # SMART ROUTING FUNCTIONS
@@ -138,7 +143,7 @@ def get_ai_response(user_query: str) -> str:
     )
 
     # ---------- CONDITIONAL TOOLS ----------
-    tools = [tavily_tool] if needs_web_search(user_query) else []
+    tools = [tavily_tool] if (needs_web_search(user_query) and tavily_tool) else []
 
     agent = create_react_agent(
         model=llm,
