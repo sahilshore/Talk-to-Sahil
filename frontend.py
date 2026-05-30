@@ -255,23 +255,33 @@ if st.session_state.mode == "chat":
 else:
     audio = st.audio_input("🎙️ Tap to record, tap again to stop")
     if audio:
-        audio_bytes = audio.getbuffer().tobytes()
-        audio_hash = hash(audio_bytes)
+        try:
+            audio_bytes = audio.getbuffer().tobytes()
 
-        if audio_hash != st.session_state.last_audio_hash:
-            st.session_state.last_audio_hash = audio_hash
+            # Skip if too short (under ~0.5 KB = less than ~1 second)
+            if len(audio_bytes) < 5000:
+                st.warning("Recording too short — please hold and speak for at least 2 seconds.")
+            else:
+                audio_hash = hash(audio_bytes)
 
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as f:
-                f.write(audio_bytes)
-                tmp_path = f.name
+                if audio_hash != st.session_state.last_audio_hash:
+                    st.session_state.last_audio_hash = audio_hash
 
-            with st.spinner("Transcribing…"):
-                result = client.audio.transcriptions.create(
-                    model="whisper-1",
-                    file=open(tmp_path, "rb"),
-                    language="en",
-                )
+                    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as f:
+                        f.write(audio_bytes)
+                        tmp_path = f.name
 
-            user_text = result.text.strip()
-            if user_text:
-                process_and_respond(user_text)
+                    with st.spinner("Transcribing…"):
+                        result = client.audio.transcriptions.create(
+                            model="whisper-1",
+                            file=open(tmp_path, "rb"),
+                            language="en",
+                        )
+
+                    user_text = result.text.strip()
+                    if user_text:
+                        process_and_respond(user_text)
+                    else:
+                        st.warning("Could not hear anything — please try speaking again.")
+        except Exception as e:
+            st.error(f"Voice error: {e}")
