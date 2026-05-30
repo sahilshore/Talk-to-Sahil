@@ -26,10 +26,12 @@ def load_vectorstore(path: str):
 # LOAD VECTOR STORES (TWO PDFs)
 # =====================================================
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 @st.cache_resource
 def init_vectorstores():
-    sahil_db = load_vectorstore("data/sahil_profile.pdf")
-    x100_db = load_vectorstore("data/100x_profile.pdf")
+    sahil_db = load_vectorstore(os.path.join(BASE_DIR, "data", "Sahil_Profile.pdf"))
+    x100_db = load_vectorstore(os.path.join(BASE_DIR, "data", "100x_profile.pdf"))
     return sahil_db, x100_db
 
 SAHIL_DB, X100_DB = init_vectorstores()
